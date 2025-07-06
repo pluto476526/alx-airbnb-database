@@ -98,3 +98,85 @@ FULL OUTER JOIN
     bookings ON users.user_id = bookings.user_id;
 ```
 
+
+
+# SQL Subquery Examples
+
+Subqueries allow us to perform conditional logic based on aggregated or related data.
+
+---
+
+## 1. Properties with Average Rating Greater Than 4.0
+
+**Purpose**
+This query retrieves all properties whose average review rating exceeds 4.0. It uses a **non-correlated subquery** in the `WHERE` clause to calculate average ratings grouped by property.
+
+**Use Case**
+Useful for displaying high-rated properties or filtering listings based on customer satisfaction.
+
+**SQL Query**
+```sql
+SELECT
+    property_id,
+    title,
+    location
+FROM
+    properties
+WHERE
+    property_id IN (
+        SELECT
+            property_id
+        FROM
+            reviews
+        GROUP BY
+            property_id
+        HAVING
+            AVG(rating) > 4.0
+    );
+````
+
+**Explanation**
+
+* The subquery selects `property_id` values with an average rating above 4.0.
+* The outer query retrieves full details for those properties.
+* `HAVING AVG(rating) > 4.0` ensures only well-reviewed properties are returned.
+
+---
+
+## 2. Users with More Than 3 Bookings
+
+**Purpose**
+This query retrieves users who have made more than three bookings. It uses a **correlated subquery**, which references the outer query's user for each evaluation.
+
+**Use Case**
+Ideal for identifying frequent users, rewarding loyal customers, or performing user segmentation.
+
+**SQL Query**
+
+```sql
+SELECT
+    user_id,
+    first_name,
+    last_name,
+    email
+FROM
+    users u
+WHERE
+    (
+        SELECT
+            COUNT(*)
+        FROM
+            bookings b
+        WHERE
+            b.user_id = u.user_id
+    ) > 3;
+```
+
+**Explanation**
+
+* For each user in the `users` table, the subquery counts how many bookings that user has made.
+* Only users with more than 3 bookings are included in the final result.
+* The correlation occurs through `b.user_id = u.user_id`.
+
+---
+
